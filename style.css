@@ -73,17 +73,80 @@ body {
 .right-sidebar {
   width: var(--sidebar-width);
   background: white;
-  border-left: 1px solid #ddd;
   display: flex;
   flex-direction: column;
   box-shadow: -2px 0 5px rgba(0,0,0,0.05);
-  z-index: 5; /* Ensure sidebar is above blockly canvas edges if needed */
+  z-index: 5; 
+  flex-shrink: 0;
 }
+
+/* 新增：侧边栏折叠状态 */
+.right-sidebar.collapsed {
+  width: 0 !important;
+  min-width: 0 !important;
+  overflow: hidden;
+  border: none !important;      /* 彻底移除边框 */
+  box-shadow: none !important;   /* 彻底移除阴影 */
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Resizers */
+.resizer-vertical {
+  width: 5px;
+  background: #f1f2f6;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  cursor: col-resize;
+  z-index: 1000; /* Ensure high z-index */
+  transition: background 0.2s;
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.resizer-vertical:hover,
+.resizer-vertical.resizing {
+  background: var(--primary-color);
+}
+
+.resizer-horizontal {
+  height: 10px; /* Increase hit area */
+  background: transparent;
+  cursor: row-resize;
+  position: absolute;
+  top: -5px; /* Center over the border */
+  left: 0;
+  width: 100%;
+  z-index: 1000; /* Ensure high z-index */
+}
+
+.resizer-horizontal:hover,
+.resizer-horizontal.resizing {
+  background: rgba(0, 151, 157, 0.3);
+}
+
 
 .sidebar-tabs {
   display: flex;
   background: #dfe4ea;
+  align-items: center; /* 确保按钮垂直居中 */
 }
+
+/* 新增：内部隐藏按钮基础样式 (侧边栏和底栏通用) */
+.side-toggle, .foot-toggle {
+  background: transparent;
+  border: none;
+  color: #747d8c;
+  cursor: pointer;
+  padding: 0 10px;
+  font-size: 0.9rem;
+  transition: color 0.2s, transform 0.2s;
+}
+.side-toggle:hover, .foot-toggle:hover {
+  color: var(--primary-color);
+  transform: scale(1.1);
+}
+.foot-toggle { float: right; } /* 底栏按钮靠右显示 */
+
 .tab-btn {
   flex: 1;
   padding: 10px;
@@ -142,14 +205,26 @@ body {
   position: relative;
   border-top: 4px solid var(--primary-color);
   z-index: 20;
+  /* 移除 transition: height 0.3s ease; 这会导致延迟感 */
+}
+
+/* 新增：底栏折叠状态 */
+.footer.collapsed {
+  height: 0 !important;
+  min-height: 0 !important;
+  border: none !important;      /* 彻底移除顶边框 */
+  overflow: hidden;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .action-dock {
   position: absolute;
-  top: -22px; /* Half overlapping */
+  top: -22px; 
   left: 50%;
   transform: translateX(-50%);
-  z-index: 30;
+  /* 将 z-index 提升到 1001 或更高，确保它在拖拽条之上 */
+  z-index: 1001;
 }
 
 .compile-btn {
@@ -167,9 +242,15 @@ body {
   gap: 10px;
   transition: transform 0.1s, background 0.3s;
 }
-.compile-btn:hover { background: #26af61; transform: translateX(-50%) scale(1.05); }
-.compile-btn:active { transform: translateX(-50%) scale(0.95); }
-
+.compile-btn:hover { 
+  background: #26af61; 
+  /* 移除 translateX(-50%)，仅保留缩放动画 */
+  transform: scale(1.05); 
+}
+.compile-btn:active { 
+  /* 移除 translateX(-50%)，仅保留缩放动画 */
+  transform: scale(0.95); 
+}
 .console-output {
   flex: 1;
   display: flex;
@@ -183,6 +264,9 @@ body {
   margin-bottom: 5px;
   text-transform: uppercase;
   letter-spacing: 1px;
+  display: flex; /* 使用 flex 让文字和隐藏按钮分居两侧 */
+  justify-content: space-between;
+  align-items: center;
 }
 .console-body {
   flex: 1;
@@ -193,4 +277,56 @@ body {
   font-size: 0.85rem;
   overflow-y: auto;
   color: #00d2d3;
+}
+
+/* 透明感应条基础样式 */
+.edge-trigger-v, .edge-trigger-h {
+  position: fixed;
+  display: none;    /* 初始隐藏，仅在折叠时开启 */
+  z-index: 2000;    /* 必须高于所有元素 */
+  background: transparent;
+}
+
+/* 右侧感应条 */
+.edge-trigger-v {
+  right: 0;
+  top: var(--header-height);
+  width: 15px;      /* 较窄的鼠标感应区 */
+  height: calc(100vh - var(--header-height));
+  display: flex;
+  align-items: center;
+}
+
+/* 底部感应条 */
+.edge-trigger-h {
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+/* 隐藏后悬停浮现的按钮 */
+.restore-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 5px;
+  cursor: pointer;
+  opacity: 0;       /* 默认透明 */
+  transition: opacity 0.3s, background 0.2s;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+/* 鼠标靠近感应区时按钮显现 */
+.edge-trigger-v:hover .restore-btn, 
+.edge-trigger-h:hover .restore-btn {
+  opacity: 1;
+}
+
+.restore-btn:hover {
+  background: #007a7e;
 }

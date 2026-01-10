@@ -2,10 +2,10 @@
 var toolboxDom = Blockly.utils.xml.textToDom(toolboxXml);
 
 var workspace = Blockly.inject('blocklyDiv', {
-  toolbox: toolboxDom,
+  toolbox: typeof toolboxXml !== 'undefined' ? toolboxXml : '<xml></xml>', 
   grid: { spacing: 20, length: 3, colour: '#ccc', snap: true },
   trashcan: true,
-  zoom: { controls: true, wheel: true } // 开启缩放
+  zoom: { controls: true, wheel: true }
 });
 
 // 2. 实时生成代码到右侧预览区
@@ -70,3 +70,116 @@ updateCode();
 window.addEventListener('resize', function() {
   Blockly.svgResize(workspace);
 });
+
+// 5. 布局拖拽缩放逻辑
+(function() {
+  const sidebarResizer = document.getElementById('sidebar-resizer');
+  const footerResizer = document.getElementById('footer-resizer');
+  const sidebar = document.querySelector('.right-sidebar');
+  const footer = document.querySelector('.footer');
+  const body = document.body;
+
+  let isResizingSidebar = false;
+  let isResizingFooter = false;
+
+  // --- Sidebar Resizing ---
+  sidebarResizer.addEventListener('mousedown', function(e) {
+    e.preventDefault(); // 防止默认选择行为
+    isResizingSidebar = true;
+    sidebarResizer.classList.add('resizing');
+    body.style.cursor = 'col-resize';
+    body.style.userSelect = 'none'; 
+  });
+
+  // --- Footer Resizing ---
+  footerResizer.addEventListener('mousedown', function(e) {
+    e.preventDefault(); // 防止默认选择行为
+    isResizingFooter = true;
+    footerResizer.classList.add('resizing');
+    body.style.cursor = 'row-resize';
+    body.style.userSelect = 'none';
+  });
+
+  // --- Global Mouse Move ---
+  document.addEventListener('mousemove', function(e) {
+    if (!isResizingSidebar && !isResizingFooter) return;
+    
+    e.preventDefault(); // 防止拖拽时的意外选中
+
+    if (isResizingSidebar) {
+      // 计算新宽度：窗口宽度 - 鼠标X坐标
+      // 可以添加最小/最大宽度限制
+      let newWidth = window.innerWidth - e.clientX;
+      if (newWidth < 200) newWidth = 200; // Min width
+      if (newWidth > 600) newWidth = 600; // Max width
+      
+      sidebar.style.width = newWidth + 'px';
+      
+      // 调整 CSS 变量 (可选，如果 CSS 中使用了变量)
+      // document.documentElement.style.setProperty('--sidebar-width', newWidth + 'px');
+    }
+
+    if (isResizingFooter) {
+      // 计算新高度：窗口高度 - 鼠标Y坐标
+      let newHeight = window.innerHeight - e.clientY;
+      if (newHeight < 50) newHeight = 50; // Min height
+      if (newHeight > 400) newHeight = 400; // Max height
+
+      footer.style.height = newHeight + 'px';
+      // document.documentElement.style.setProperty('--footer-height', newHeight + 'px');
+    }
+
+    // 重要：Blockly 需要重新计算布局
+    Blockly.svgResize(workspace);
+  });
+
+  // --- Global Mouse Up ---
+  document.addEventListener('mouseup', function(e) {
+    if (isResizingSidebar || isResizingFooter) {
+      isResizingSidebar = false;
+      isResizingFooter = false;
+      sidebarResizer.classList.remove('resizing');
+      footerResizer.classList.remove('resizing');
+      body.style.cursor = '';
+      body.style.userSelect = '';
+      
+      // 最后再触发一次 resize 确保万无一失
+      Blockly.svgResize(workspace);
+    }
+  });
+})();
+
+// 6. [新增] 侧边栏与底边栏隐藏/显示切换逻辑
+
+// 切换侧边栏
+window.toggleSidebar = function() {
+  const sidebar = document.querySelector('.right-sidebar');
+  const resizer = document.getElementById('sidebar-resizer');
+  const trigger = document.getElementById('side-trigger');
+  
+  // 切换折叠类名
+  const isCollapsed = sidebar.classList.toggle('collapsed');
+  
+  // 隐藏边栏时，同时隐藏拖拽条，显示边缘感应区
+  resizer.style.display = isCollapsed ? 'none' : 'block';
+  trigger.style.display = isCollapsed ? 'flex' : 'none';
+  
+  // 通知 Blockly 重新计算布局宽度
+  Blockly.svgResize(workspace);
+};
+
+// 切换底部栏
+window.toggleFooter = function() {
+  const footer = document.querySelector('.footer');
+  const resizer = document.getElementById('footer-resizer'); // 底部拖拽条
+  const trigger = document.getElementById('foot-trigger');   // 底部感应区
+  // 切换折叠类名
+  const isCollapsed = footer.classList.toggle('collapsed');
+  
+  // 显示或隐藏底部的边缘感应区
+  resizer.style.display = isCollapsed ? 'none' : 'block';
+  trigger.style.display = isCollapsed ? 'flex' : 'none';
+  
+  // 延迟执行重绘以确保布局更新完成
+  Blockly.svgResize(workspace);
+};

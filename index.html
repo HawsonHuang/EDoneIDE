@@ -39,11 +39,15 @@
     <!-- Blockly Canvas -->
     <div id="blocklyDiv" class="blockly-area"></div>
     
+    <!-- Sidebar Resizer -->
+    <div id="sidebar-resizer" class="resizer-vertical"></div>
+
     <!-- Right Sidebar -->
     <div class="right-sidebar">
       <div class="sidebar-tabs">
         <button class="tab-btn active" onclick="switchTab('code')">代码预览</button>
         <button class="tab-btn" onclick="switchTab('ai')">AI 助手</button>
+        <button class="side-toggle" onclick="toggleSidebar()"><i class="fas fa-arrow-right"></i></button>
       </div>
       <div id="tab-content-code" class="tab-content active">
         <textarea id="code-preview" readonly placeholder="// 生成的代码将显示在这里..."></textarea>
@@ -55,10 +59,15 @@
         </div>
       </div>
     </div>
+
+    <div id="side-trigger" class="edge-trigger-v" onclick="toggleSidebar()">
+      <button class="restore-btn"><i class="fas fa-chevron-left"></i></button>
+    </div>
   </div>
 
   <!-- Footer / Status Bar -->
   <div class="footer">
+    <div id="footer-resizer" class="resizer-horizontal"></div>
     <!-- Action Button (Floating centered or docked) -->
     <div class="action-dock">
        <button class="compile-btn" onclick="compileAndUpload()">
@@ -67,11 +76,18 @@
     </div>
     
     <div class="console-output">
-      <div class="console-header">系统输出</div>
+      <div class="console-header">
+        系统输出
+        <button class="foot-toggle" onclick="toggleFooter()"><i class="fas fa-chevron-down"></i></button>
+      </div>
       <div id="debug-log" class="console-body">
         [System] Ready.
       </div>
     </div>
+  </div>
+
+  <div id="foot-trigger" class="edge-trigger-h" onclick="toggleFooter()">
+    <button class="restore-btn"><i class="fas fa-chevron-up"></i></button>
   </div>
 
   <script src="js/custom_blocks.js"></script>
