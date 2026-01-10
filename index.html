@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Blockly 极简部署</title>
+  <!-- Blockly Libs -->
+  <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
+  <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
+  <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
+  <script src="https://unpkg.com/blockly/msg/zh-hans.js"></script>
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <h1 class="logo"><i class="fas fa-cubes"></i> Blockly Arduino</h1>
+    </div>
+    <div class="nav-right">
+      <div class="board-selector">
+        <label for="board-select"><i class="fas fa-microchip"></i> 板卡型号:</label>
+        <select id="board-select">
+          <option value="uno">Arduino Uno</option>
+          <option value="nano">Arduino Nano</option>
+          <option value="mega">Arduino Mega</option>
+          <option value="esp32">ESP32</option>
+        </select>
+      </div>
+      <button class="icon-btn" title="设置"><i class="fas fa-cog"></i></button>
+    </div>
+  </nav>
+
+  <!-- Main Workspace Area -->
+  <div class="main-container">
+    <!-- Blockly Canvas -->
+    <div id="blocklyDiv" class="blockly-area"></div>
+    
+    <!-- Right Sidebar -->
+    <div class="right-sidebar">
+      <div class="sidebar-tabs">
+        <button class="tab-btn active" onclick="switchTab('code')">代码预览</button>
+        <button class="tab-btn" onclick="switchTab('ai')">AI 助手</button>
+      </div>
+      <div id="tab-content-code" class="tab-content active">
+        <textarea id="code-preview" readonly placeholder="// 生成的代码将显示在这里..."></textarea>
+      </div>
+      <div id="tab-content-ai" class="tab-content">
+        <div class="ai-placeholder">
+          <i class="fas fa-robot"></i>
+          <p>AI 对话功能开发中...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer / Status Bar -->
+  <div class="footer">
+    <!-- Action Button (Floating centered or docked) -->
+    <div class="action-dock">
+       <button class="compile-btn" onclick="compileAndUpload()">
+         <i class="fas fa-play-circle"></i> 编译 & 上传
+       </button>
+    </div>
+    
+    <div class="console-output">
+      <div class="console-header">系统输出</div>
+      <div id="debug-log" class="console-body">
+        [System] Ready.
+      </div>
+    </div>
+  </div>
+
+  <script src="js/custom_blocks.js"></script>
+  <script src="js/toolbox.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
