@@ -1,6 +1,7 @@
-// 4. 定义你之前报错的自定义积木
-// 防止出现 "Invalid block definition" 错误
-Blockly.Blocks['arduino_digital_write'] = {
+// js/custom_blocks.js
+
+// 1. 数字输出（控件）
+Blockly.Blocks['controls_digital_write'] = {
   init: function() {
     this.appendDummyInput()
         .appendField("数字输出 引脚")
@@ -9,23 +10,34 @@ Blockly.Blocks['arduino_digital_write'] = {
         .appendField(new Blockly.FieldDropdown([["高","HIGH"], ["低","LOW"]]), "STAT");
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
-    this.setColour(230);
+    this.setColour("#57945a");
+    this.setTooltip("向指定引脚输出高电平或低电平");
   }
 };
 
-Blockly.Blocks['arduino_digital_read'] = {
+// 2. 数字输入（控件）
+Blockly.Blocks['controls_digital_read'] = {
   init: function() {
     this.appendDummyInput()
-        .appendField("数字读取 引脚")
+        .appendField("数字输入 引脚")
         .appendField(new Blockly.FieldTextInput("13"), "PIN");
     this.setOutput(true, "Boolean");
-    this.setColour(230);
+    this.setColour("#57945a");
+    this.setTooltip("读取指定引脚的电平状态");
   }
 };
 
-// 5. 定义对应的代码生成器
-javascript.javascriptGenerator.forBlock['arduino_digital_write'] = function(block) {
-  var pin = block.getFieldValue('PIN');
-  var stat = block.getFieldValue('STAT');
-  return `digitalWrite(${pin}, ${stat});\n`;
+// 3. 延时（控件）
+Blockly.Blocks['controls_delay'] = {
+  init: function() {
+    this.appendValueInput("DELAY_TIME")
+        .setCheck("Number")
+        .appendField("延时");
+    this.appendDummyInput()
+        .appendField("毫秒");
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour("#57945a");
+    this.setTooltip("程序暂停指定的时间");
+  }
 };
