@@ -9,12 +9,18 @@ var workspace = Blockly.inject('blocklyDiv', {
 });
 
 // 2. 实时生成代码到右侧预览区
+var currentGenerator = arduinoGenerator;
 function updateCode() {
-  var code = javascript.javascriptGenerator.workspaceToCode(workspace);
-  // 获取 textarea 元素，注意这里的 ID 要和 HTML 对应
-  var codeArea = document.getElementById('code-preview');
-  if (codeArea) {
-    codeArea.value = code;
+  // 1. 调用 arduinoGenerator 的全文生成逻辑
+  // 该函数内部会自动调用 finish()，返回包含 setup 和 loop 的完整 .ino 字符串
+  const code = arduinoGenerator.workspaceToCode(workspace);
+
+  // 2. 获取 UI 中的代码预览文本框
+  const codePreview = document.getElementById('code-preview');
+
+  // 3. 【核心修正】直接赋值，不要在外面包裹任何字符串模板
+  if (codePreview) {
+    codePreview.value = code;
   }
 }
 
@@ -182,4 +188,56 @@ window.toggleFooter = function() {
   
   // 延迟执行重绘以确保布局更新完成
   Blockly.svgResize(workspace);
+};
+
+window.openCourse = function() {
+  // 检查引擎和课程数据是否已加载
+  if (typeof GuideEngine !== 'undefined' && typeof Lesson_LED_Blink !== 'undefined') {
+    // 调用独立引擎，传入独立文档中的课程对象
+    GuideEngine.start(Lesson_LED_Blink);
+    
+  } else {
+    console.error("教学模块加载失败，请检查 course 文件夹路径。");
+  }
+};
+
+// AI 对话交互逻辑
+document.getElementById('ai-send-btn').addEventListener('click', function() {
+  const input = document.getElementById('ai-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  const chatContainer = document.getElementById('ai-chat-container');
+
+  // 1. 添加用户消息气泡
+  const userDiv = document.createElement('div');
+  userDiv.className = 'message user-msg';
+  userDiv.innerHTML = `<div class="bubble">${msg}</div>`;
+  chatContainer.appendChild(userDiv);
+
+  // 2. 清空输入并滚动到底部
+  input.value = '';
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+
+  // 3. 模拟 AI 自动回复（后续接入 n8n/API）
+  setTimeout(() => {
+    const aiDiv = document.createElement('div');
+    aiDiv.className = 'message ai-msg';
+    aiDiv.innerHTML = `
+      <i class="fas fa-robot"></i>
+      <div class="bubble">正在分析您的需求并尝试构建代码块...</div>
+    `;
+    chatContainer.appendChild(aiDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }, 800);
+});
+
+// 支持回车发送
+document.getElementById('ai-input').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') document.getElementById('ai-send-btn').click();
+});
+
+// 预览面板关闭函数
+window.closeAiPreview = function() {
+  document.getElementById('ai-block-preview-area').style.display = 'none';
 };

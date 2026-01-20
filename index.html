@@ -9,6 +9,7 @@
   <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
   <script src="https://unpkg.com/blockly/msg/zh-hans.js"></script>
   <!-- FontAwesome for Icons -->
+   <link rel="icon" href="data:;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   
   <link rel="stylesheet" href="style.css">
@@ -30,6 +31,7 @@
           <option value="esp32">ESP32</option>
         </select>
       </div>
+      <button class="icon-btn" onclick="openCourse()" title="开始教学课程"><i class="fas fa-graduation-cap"></i></button>
       <button class="icon-btn" title="设置"><i class="fas fa-cog"></i></button>
     </div>
   </nav>
@@ -52,10 +54,32 @@
       <div id="tab-content-code" class="tab-content active">
         <textarea id="code-preview" readonly placeholder="// 生成的代码将显示在这里..."></textarea>
       </div>
+
+      <!--AI Part-->>
       <div id="tab-content-ai" class="tab-content">
-        <div class="ai-placeholder">
-          <i class="fas fa-robot"></i>
-          <p>AI 对话功能开发中...</p>
+        <div class="ai-chat-wrapper">
+          <div id="ai-chat-container" class="ai-chat-container">
+            <div class="message ai-msg">
+              <i class="fas fa-robot"></i>
+              <div class="bubble">你好！我是您的 Arduino 编程助手。您可以告诉我想要实现的功能，我会为您生成代码积木。</div>
+            </div>
+            </div>
+
+          <div id="ai-block-preview-area" class="ai-preview-panel" style="display: none;">
+            <div class="preview-header">
+              <span><i class="fas fa-cubes"></i> 建议积木</span>
+              <button class="close-preview" onclick="closeAiPreview()"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="aiBlockPreview" class="mini-workspace"></div>
+            <button class="import-btn" onclick="importAiBlockToMain()">添加到画布</button>
+          </div>
+
+          <div class="ai-input-wrapper">
+            <div class="input-box">
+              <input type="text" id="ai-input" placeholder="例如：让 13 号引脚的 LED 每秒闪烁一次...">
+              <button id="ai-send-btn" title="发送"><i class="fas fa-paper-plane"></i></button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -74,7 +98,7 @@
          <i class="fas fa-play-circle"></i> 编译 & 上传
        </button>
     </div>
-    
+     
     <div class="console-output">
       <div class="console-header">
         系统输出
@@ -90,8 +114,12 @@
     <button class="restore-btn"><i class="fas fa-chevron-up"></i></button>
   </div>
 
+  <script src="course/course_led_01.js"></script>
+  <script src="course/guide_engine.js"></script>
+
   <script src="js/custom_blocks.js"></script>
   <script src="js/toolbox.js"></script>
+  <script src="js/arduino_generator.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
