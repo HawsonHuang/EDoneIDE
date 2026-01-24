@@ -19,8 +19,8 @@ const Lesson_LED_Blink = {
       position: "right"
     },
     {
-      // 精准匹配积木面板中的第一个可拖拽积木
-      target: ".blocklyFlyout .blocklyBlockCanvas > g.blocklyDraggable", 
+      // 通过 Block 类型在飞出面板中查找具体积木（更稳）
+      target: "BLOCKTYPE:controls_digital_write", 
       title: "第二步：拖出积木",
       content: "把‘数字输出引脚’积木拖拽到中间的工作区。",
       position: "right"

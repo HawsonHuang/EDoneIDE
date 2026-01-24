@@ -55,18 +55,43 @@ window.compileAndUpload = function() {
     logDiv.scrollTop = logDiv.scrollHeight;
   }
 
-  log(`开始编译...`);
+  const code = arduinoGenerator.workspaceToCode(workspace);
+  if (!code || code.trim() === "// 助创客体系 自动生成代码\nvoid setup() {\n}\n\nvoid loop() {\n\n}") {
+    log("提示：当前画布为空，仅生成了基础模板。", "#ffa502");
+  }
   log(`目标平台: ${document.getElementById('board-select').value}`);
   
-  // 模拟延迟
-  setTimeout(() => {
-    log(`编译成功! (Sketch uses 12% program storage space)`);
-    log(`开始上传...`);
-  }, 1000);
+  // 执行下载逻辑
+  try {
+    // 创建 Blob 对象，指定内容类型为纯文本
+    const blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    
+    // 创建虚拟链接进行下载
+    const downloadLink = document.createElement('a');
+    downloadLink.href = url;
+    
+    // 文件名建议：获取当前日期时间，防止重名
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    downloadLink.download = `sketch_${timestamp}.ino`;
+    
+    // 触发点击并移除
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    
+    // 释放 URL 对象内存
+    URL.revokeObjectURL(url);
+
+    log(`代码导出成功！文件已保存为 .ino 格式。`, '#2ed573');
+  } catch (err) {
+    log(`导出失败: ${err.message}`, '#ff4757');
+  }
   
+  // 模拟编译提示
   setTimeout(() => {
-    log(`上传完成!`, '#2ed573');
-  }, 2500);
+    log(`本地编译环境已就绪。请使用 Arduino IDE 打开下载的文件进行上传。`);
+  }, 1000);
 };
 
 // 初始化时触发一次代码更新

@@ -56,6 +56,31 @@ const GuideEngine = {
         // 如果 API 方式失败，继续走文本模式回退
       }
 
+      // 通过 Block 类型在飞出面板中查找具体积木（比 DOM 更稳）
+      if (selector.startsWith('BLOCKTYPE:')) {
+        const type = selector.replace('BLOCKTYPE:', '').trim();
+        const ws = (typeof Blockly !== 'undefined' && Blockly.getMainWorkspace)
+          ? Blockly.getMainWorkspace()
+          : (window.workspace || null);
+        // 获取飞出面板
+        let flyout = null;
+        if (ws) {
+          const toolbox = ws.getToolbox && ws.getToolbox() ? ws.getToolbox() : null;
+          flyout = toolbox && toolbox.getFlyout ? toolbox.getFlyout() : (ws.getFlyout ? ws.getFlyout() : null);
+        }
+        if (flyout && flyout.getWorkspace) {
+          const fws = flyout.getWorkspace();
+          const blocks = fws.getTopBlocks(false) || [];
+          for (const b of blocks) {
+            if (b.type === type) {
+              // 返回该积木的 SVG 根元素用于高亮
+              if (b.getSvgRoot) return b.getSvgRoot();
+            }
+          }
+        }
+        return null;
+      }
+
       // 如果是文本模式，手动遍历所有分类标签
       if (selector.startsWith('TEXT:')) {
         const targetText = selector.replace('TEXT:', '').trim();
