@@ -75,6 +75,17 @@ arduinoGenerator.forBlock['math_number'] = function(block) {
   return [String(parseFloat(block.getFieldValue('NUM'))), Order.ATOMIC]
 }
 
+// 字串（Blockly 內建 text 塊，用於串口列印等輸入）
+arduinoGenerator.forBlock['text'] = function(block) {
+  const raw = block.getFieldValue('TEXT') || ''
+  const escaped = raw
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+  return [`"${escaped}"`, Order.ATOMIC]
+}
+
 arduinoGenerator.forBlock['math_arithmetic'] = function(block, generator) {
   const OP = {
     ADD: [' + ', Order.ADDITIVE],
@@ -117,6 +128,31 @@ arduinoGenerator.forBlock['controls_digital_read'] = function(block) {
 arduinoGenerator.forBlock['controls_delay'] = function(block, generator) {
   const t = generator.valueToCode(block, 'DELAY_TIME', Order.NONE) || '0'
   return `delay(${t});\n`
+}
+
+// 串口
+arduinoGenerator.forBlock['serial_begin'] = function(block) {
+  const baud = block.getFieldValue('BAUD') || '9600'
+  arduinoGenerator.addSetup('serial_begin', `Serial.begin(${baud});`)
+  return ''
+}
+
+arduinoGenerator.forBlock['serial_print'] = function(block, generator) {
+  const text = generator.valueToCode(block, 'TEXT', Order.NONE) || '""'
+  return `Serial.print(${text});\n`
+}
+
+arduinoGenerator.forBlock['serial_println'] = function(block, generator) {
+  const text = generator.valueToCode(block, 'TEXT', Order.NONE) || '""'
+  return `Serial.println(${text});\n`
+}
+
+arduinoGenerator.forBlock['serial_read'] = function() {
+  return ['Serial.read()', Order.ATOMIC]
+}
+
+arduinoGenerator.forBlock['serial_available'] = function() {
+  return ['Serial.available()', Order.ATOMIC]
 }
 
 export const generateArduinoCode = (workspace) => {

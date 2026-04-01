@@ -18,4 +18,5 @@ app.listen(config.port, () => {
   console.log(`  健康檢查: GET /health`)
   console.log(`  上傳流程: POST /api/code -> POST /api/compile -> POST /api/upload`)
   console.log(`  埠口列表: GET /api/ports`)
+  console.log(`  串口: GET /api/serial/state, POST /api/serial/open|close|write, GET /api/serial/stream (SSE)`)
 })

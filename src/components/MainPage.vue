@@ -1,9 +1,17 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import Topbar from './topbar/Topbar.vue'
 import Sidebar from './sidebar/Sidebar.vue'
 import WorkSpace from './workspace/WorkSpace.vue'
 import BottomBar from './bottombar/Bottombar.vue'
+import CourseOverlay from '../course/CourseOverlay.vue'
+import { useLocalStore } from '../stores/localStore'
+
+const localStore = useLocalStore()
+
+onMounted(() => {
+  localStore.loadPorts()
+})
 
 const layout = reactive({
   topBarHeight: 48,
@@ -72,6 +80,8 @@ const stopResize = () => {
         <Sidebar />
       </div>
     </div>
+
+    <CourseOverlay />
   </div>
 </template>
 

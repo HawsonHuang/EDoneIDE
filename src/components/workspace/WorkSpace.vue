@@ -1,7 +1,7 @@
 <template>
-  <div class="h-full w-full overflow-hidden bg-white relative">
-    <!-- Blockly 畫布區域 -->
-    <div id="blocklyDiv" class="absolute inset-0"></div>
+  <div class="h-full w-full overflow-hidden bg-white relative min-h-[320px]" data-tour="workspace">
+    <!-- Blockly 畫布區域：確保有最小尺寸，避免 inject 時為 0 導致不渲染 -->
+    <div id="blocklyDiv" class="absolute inset-0 min-w-[400px] min-h-[300px]"></div>
   </div>
 </template>
 
@@ -39,6 +39,9 @@ onMounted(async () => {
     const workspace = inject('blocklyDiv', {
       toolbox: toolboxConfig as any,
       toolboxPosition: TOOLBOX_AT_LEFT,
+      // 必須為 true，否則 Blockly 不注入內建 CSS，積木/圖標會只顯示空白框
+      hasCss: true,
+      pathToMedia: '',
       zoom: {
         controls: true,
         wheel: true,
@@ -73,7 +76,14 @@ onMounted(async () => {
 
     const resizeListener = () => svgResize(workspace)
     window.addEventListener('resize', resizeListener)
-    resizeCleanupRef.value = () => window.removeEventListener('resize', resizeListener)
+    const resizeObserver = new ResizeObserver(() => {
+      svgResize(workspace)
+    })
+    resizeObserver.observe(container)
+    resizeCleanupRef.value = () => {
+      window.removeEventListener('resize', resizeListener)
+      resizeObserver.disconnect()
+    }
   } catch (err) {
     console.error('注入失敗：', err)
   }

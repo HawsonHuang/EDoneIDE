@@ -1,5 +1,16 @@
 const { run } = require('./exec')
 
+/** 只保留實際埠路徑（COM3、/dev/ttyUSB0），避免 "COM63 serial" 等導致開埠失敗 */
+function normalizePort(s) {
+  if (!s || typeof s !== 'string') return ''
+  const t = s.trim()
+  const com = t.match(/^(COM\d+)/i)
+  if (com) return com[1].toUpperCase()
+  const dev = t.match(/^(\/dev\/\S+)/)
+  if (dev) return dev[1]
+  return t.split(/\s+/)[0] || t
+}
+
 /**
  * 使用 arduino-cli 列舉已連接的板子與埠口。
  * 先嘗試 --format json，若無結果則解析純文字輸出；若仍無則回傳 []。
@@ -14,7 +25,7 @@ async function listPortsFromArduinoCli(arduinoCliPath) {
     try {
       const row = JSON.parse(line)
       if (row.port && row.port.address) {
-        const addr = (row.port.address || '').trim().split(/\s+/)[0]
+        const addr = normalizePort(row.port.address)
         if (!addr) continue
         ports.push({
           port: addr,
@@ -45,7 +56,7 @@ async function listPortsFromArduinoCli(arduinoCliPath) {
       const idx = parts.indexOf(first)
       const board = (parts[idx + 2] || parts[idx + 1] || first).trim()
       const fqbn = (parts[idx + 3] || parts.find((t) => t && t.includes(':')) || '').trim() || null
-      ports.push({ port: first, board: board || first, fqbn: fqbn || null })
+      ports.push({ port: normalizePort(first), board: board || first, fqbn: fqbn || null })
     }
   }
   return ports
@@ -59,10 +70,10 @@ async function listPortsFromSerialPort() {
     const { SerialPort } = require('serialport')
     const list = await SerialPort.list()
     return list.map((p) => ({
-      port: p.path,
+      port: normalizePort(p.path),
       board: p.manufacturer || p.serialNumber ? `串口 (${p.manufacturer || p.serialNumber || ''})` : '串口 (未識別板型)',
       fqbn: null,
-    }))
+    })).filter((p) => p.port)
   } catch (err) {
     return []
   }

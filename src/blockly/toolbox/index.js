@@ -64,6 +64,18 @@ export const toolboxConfig = {
           inputs: { DELAY_TIME: { shadow: { type: 'math_number', fields: { NUM: 1000 } } } }
         }
       ]
+    },
+    {
+      kind: 'category',
+      name: '串口',
+      colour: '#5b9ea5',
+      contents: [
+        { kind: 'block', type: 'serial_begin' },
+        { kind: 'block', type: 'serial_print', inputs: { TEXT: { shadow: { type: 'text', fields: { TEXT: 'Hello' } } } } },
+        { kind: 'block', type: 'serial_println', inputs: { TEXT: { shadow: { type: 'text', fields: { TEXT: '' } } } } },
+        { kind: 'block', type: 'serial_read' },
+        { kind: 'block', type: 'serial_available' }
+      ]
     }
   ]
 }

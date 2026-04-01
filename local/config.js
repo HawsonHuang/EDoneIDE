@@ -1,7 +1,7 @@
 const path = require('path')
 
 module.exports = {
-  port: parseInt(process.env.LOCAL_PORT || '8765', 10),
+  port: parseInt(process.env.LOCAL_PORT || '8766', 10),
   workspaceDir: path.resolve(__dirname, 'workspace'),
   arduinoCliPath: process.env.ARDUINO_CLI_PATH || 'arduino-cli',
   // Arduino UNO R4 WiFi
